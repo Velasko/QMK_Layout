@@ -44,9 +44,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           is_alt_active = true;
           register_code(KC_LALT);
         }
-        register_code(KC_QUOTE);
+        register_code(KC_GRV);
       } else {
-        unregister_code(KC_QUOTE);
+        unregister_code(KC_GRV);
       }
       break;
   }
