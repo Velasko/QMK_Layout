@@ -67,11 +67,30 @@ layer_state_t layer_state_set_user(layer_state_t state) {
   return state;
 }
 
-const key_override_t delete_key_override = ko_make_basic(MOD_MASK_SHIFT, KC_BACKSPACE, KC_DEL);
+// Tap Dance declarations ############
+enum {
+    TD_W_HOLD,
+} tap_hold_keys;
+
+void base_tap_hold(tap_dance_state_t *state, void *user_data){
+    switch (state->count) {
+        case 1:
+            return true;
+        case 2:
+            SEND_STRING(SS_DOWN(X_W));
+            return false;
+    }
+}
+
+tap_dance_action_t tap_dance_actions[] = {
+    [TD_W_HOLD] = ACTION_TAP_DANCE_FN(base_tap_hold),
+};
+
+// Tap Dance declarations End  ############
+
 const key_override_t c_key_override = ko_make_basic(MOD_MASK_ALT, KC_C, KC_SCLN);
 
 const key_override_t **key_overrides = (const key_override_t *[]){
-    &delete_key_override,
     &c_key_override,
     NULL
 };
