@@ -6,8 +6,16 @@ os.makedirs(PATH, exist_ok=True)
 
 key_replaces = {
   "ANY(ALT_TAB)": "ALT_TAB",
-  "ANY(ALT_QUOTE)": "ALT_QUOTE"
+  "ANY(ALT_QUOTE)": "ALT_QUOTE",
+  "ANY(TD(TD_LSFT_HOLD))": "TD(TD_LSFT_HOLD)",
+  "ANY(TD(TD_W_HOLD))": "TD(TD_W_HOLD)"
 }
+
+key_double_tap_hold = [
+  "W",
+  "LSFT"
+]
+
 with open("velasco.json", "r") as file:
     data = "".join(file.readlines())
     for key, value in key_replaces.items():
@@ -69,21 +77,26 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 
 // Tap Dance declarations ############
 enum {
-    TD_W_HOLD,
+  ''' + ",\n  ".join([
+  f"TD_{key}_HOLD" for key in key_double_tap_hold
+]) + '''
 } tap_hold_keys;
-
-void base_tap_hold(tap_dance_state_t *state, void *user_data){
-    switch (state->count) {
-        case 1:
-            return true;
-        case 2:
-            SEND_STRING(SS_DOWN(X_W));
-            return false;
-    }
+''' + "\n".join(['''
+void ''' + key + '''_DOUBLE_TAP_HOLD(tap_dance_state_t *state, void *user_data){
+    register_code(KC_''' + key + ''');
 }
 
+void ''' + key + '''_DOUBLE_TAP_HOLD_RELEASE(tap_dance_state_t *state, void *user_data){
+    if(state->count != 2){
+      unregister_code(KC_''' + key + ''');
+    }
+}''' for key in key_double_tap_hold ]) + '''
+
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_W_HOLD] = ACTION_TAP_DANCE_FN(base_tap_hold),
+  ''' + ",\n  ".join([
+  f"[TD_{key}_HOLD] = ACTION_TAP_DANCE_FN_ADVANCED({key}_DOUBLE_TAP_HOLD, NULL, {key}_DOUBLE_TAP_HOLD_RELEASE)"
+  for key in key_double_tap_hold
+]) + '''
 };
 
 // Tap Dance declarations End  ############
